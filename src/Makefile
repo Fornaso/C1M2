@@ -41,104 +41,116 @@
 #   ( Use the -M* options [MP, MF, MD, MM, etc])
 #   *.o - Individual object files (main.o, memory.o, etc)
 #   1c1m2.out - Output Executable file
-
-
-
-include sources.mk
-
+#include sources.mk
 # Platform Overrides    (We override this value anyway when executing ie:
 #                       $make PLATFORM=MSP432, right?)
 #                       (How do I read that overriden PLATFORM?)
 #                       --> This is override from console doing ie:
 #                           PlATFORM=MSP432
-PLATFORM = HOST         #By deffault as HOST platform.
-
+#PLATFORM = HOST         #By deffault as HOST platform.
+#
 #General Flags (Both Platforms)
-
+#
 #   -Wall           Enable All Warning Messages (CFLAGS)
 #   -Werror         Treats All Warnings as Errors(CFLAGS)
 #   -g              Generate Debugging Info in Executable (CFLAGS)
 #   -O0             The level of optimization (-O0, -O1, -O2, -O3)) (LDFLAGS)
 #   -std=c99        The C standard set (CFLAGS)
-
-
+#
 
 #Compile time switches
-ifeq($(PLATFORM),MSP432)
-    #The list of included directories
-    INCLUDES =               \
-        -Iinclude/common     \      
-        -Iinclude/msp432     \
-        -Iinclude/CMSIS      \
+ifeq ($(PLATFORM), MSP432)
+	INCLUDES =  -I../includes/common	\
+                -I../includes/msp432	\
+		        -I../includes/CMSIS
+	SOURCES =   main.c						\
+		        memory.c						\
+		        interrupts_msp432p401r_gcc.c	\
+		        startup_msp432p401r_gcc.c     \
+                system_msp432p401r.c
 
-    #The list of sources files that will need to be compiled (Platform specific)
-    SOURCES =                           \
-        /src./main.c                        \
-        /src./memory.c                      \
-        /src./interrupts_msp432p401r_gcc.c  \
-        /src./startup_msp432p401r_gcc.c     \
-        /src./system_msp432p401r.c
-    # Architectures Specific Flags
-    LINKER_FILE = msp432p401r.lds
-    CPU = cortex-m4
-    ARCH = armv7e-m
-    SPECS = nosys.specs
+	LINKER_FILE = msp432p401r.lds
+	CPU = cortex-m4
+	ARCH = armv7e-m
+	SPECS = nosys.specs
 
-    # Compiler Flags and Defines
-    CC = arm-none-eabi-gcc
-    LD = arm-none-eabi-ld
-    LDFLAGS = -Wl, -O0, -T=$(LINKER_FILE), -Map=$(BASENAME).map
-    CFLAGS = -Wall -Werror -g -O0 -std=c99 -mcpu=$(CPU) -march=$(ARCH) --specs=$(SPECS)
-else ifeq($(PLATFORM),HOST)
-    #The list of included directories
-    INCLUDES =                  \
-        -Iinclude/common
-    #The list of sources files that will need to be compiled (Platform specific)
-    SOURCES =           \
-        /src./main.c    \
-        /src./memory.c
-    # Compiler Flags and Defines
-    CC = gcc
-    LD = ld
-    LDFLAGS = -Wl, -O0 -Map=$(BASENAME).map
-    CFLAGS = -Wall -Werror -g -O0 -std=c99
+	CC = arm-none-eabi-gcc
+	LD = arm-none-eabi-ld
+
+	LDFLAGS = -Wl, -O0, -T=$(LINKER_FILE),-Map=$(BASENAME).map
+	#Fixing the map file generation (not working)
+	#Try: -Xlinker -Map=output.map 
+	CFLAGS = -Wall -Werror -g -std=c99 -D$(PLATFORM) -mcpu=$(CPU) -march=$(ARCH) --specs=$(SPECS)
+	OBJDUMP = arm-none-eabi-objdump
+endif
+ifeq ($(PLATFORM), HOST)
+	INCLUDES = -I../includes/common
+
+	SOURCES =   main.c	\
+	            memory.c
+#./main.c ./memory.c
+	CC = gcc
+	LD = ld
+	LDFLAGS = -Wl,-O0,-Map=$(BASENAME).map
+	#No spaces after commas after -Wl option produces less errors
+	#---> Still fix gcc: error: c1m2.out: No such file or directory
+
+	CFLAGS = -Wall -Werror -g -std=c99 -D$(PLATFORM)
+	OBJDUMP = objdump
 endif
 
-#Preprocesor Flags
+
 CPPFLAGS = -E
-#Target name
 BASENAME = c1m2
 TARGET = $(BASENAME).out
+OBJS = $(SOURCES:.c/.o)
 
-#List of object files that must be produced
-OBJS = (SOURCES:.c/.o)
+#SOURCES = source_file_outside_if.c          #We write a variable content for testing it
+#Rule for testing if SOURCES variable is actually working
+.PHONY: test1
+test1:
+	@echo "Variable INCLUDES:"
+	@echo "$(INCLUDES)"
+	@echo "Variable SOURCES:"
+	@echo "$(SOURCES)"
+	@echo "PLATFORM:"
+	@echo "$(PLATFORM)"
 
-#We need to generate a handful of files for each complete build. These are:
-#   c1m2.map - Map file for the full build ( Use the -Map=<FILE> option )
-#   *.d - Dependency Files for each source file (main.dep, memory.dep, etc)
-#         (Use the -M* options [MP, MF, MD, MM, etc])
-#   *.o - Individual object files (main.o, memory.o, etc)
-#   c1m2.out - Output Executable file
+$(TARGET): $(SOURCES)
+	$(CC) $(CFLAGS) $(INCLUDES) $(SOURCES) $(LDFLAGS) -o $@
 
-#Target/Build Rules
+#5. Compile all object files and link into a final executable.
+.PHONY: build
+build: $(TARGET)
+
+
+#4. Compile all objects but do NOT link them
+.PHONY: compile-all
+compile-all: $(SOURCES)
+	$(CC) -c $(CFLAGS) $(INCLUDES) $(SOURCES)
+
 
 #1. Generates the preprocessed output of all c-program implementation files
 %.i: %.c
-    $(CC) $(CPPFLAGS) $(CFLAGS) $@ $<
-#2. Generates the object file of all c-program implementation files
+	$(CC) $(CPPFLAGS) $(CFLAGS) $@ $<
+
+
+#2. Generate assembly output of c-program implementation files and the final
+#   output executable
+%.asm: %.s $(TARGET)
+	$(CC) -S $(CFLAGS) $< -O $@
+	$(OBJDUMP) -S --disassemble $(TARGET) > $(BASENAME).asm
+
+
+#3. Generates the object file of all c-program implementation files
 %.O: %.c
-    %(CC) -c $(CFLAGS) $@ $< 
+	$(CC) -c $(CFLAGS) $@ $< 
 
-#3. Builds target
-$(TARGET): $(OBJS)
-    $(CC) $(CFLAGS) $(INCLUDES) $(LDFLAGS) -O $(TARGET) $(OBJS)
-    
-#The previous Target Rule can be re-write as
-#$(TARGET): $(OBJS)
-#    $(CC) $(CFLAGS) $(INCLUDES) $(LDFLAGS) -O $@ $^
 
-#3. PHONY RULE
-.PHONY: build
-build: all
-all: $(TARGET)
-
+#6. Removes all compiled objects, preprocessed outputs, assembly outputs,
+#   executable files and build output files
+OBJS = bject1.o
+.PHONY: clean
+clean:
+	-sudo rm -f $(OBJS) $(TARGET) $(BASENAME).map *.asm *.i
+	echo "$(OBJS)"
