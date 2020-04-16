@@ -7,7 +7,7 @@
 # software. Alex Fosdick and the University of Colorado are not liable for any
 # misuse of this material. 
 #
-#*****************************************************************************
+#******************************************************************************
 
 #------------------------------------------------------------------------------
 # Simple Makefile for multitarget build system
@@ -32,7 +32,7 @@
 #
 #------------------------------------------------------------------------------
 
-
+#------------------------------------------------------------------------------
 #   You will need to generate a handful of files for each complete build.
 #   These are:
 #
@@ -47,7 +47,7 @@
 #                       (How do I read that overriden PLATFORM?)
 #                       --> This is override from console doing ie:
 #                           PlATFORM=MSP432
-#PLATFORM = HOST         #By deffault as HOST platform.
+
 #
 #General Flags (Both Platforms)
 #
@@ -57,17 +57,30 @@
 #   -O0             The level of optimization (-O0, -O1, -O2, -O3)) (LDFLAGS)
 #   -std=c99        The C standard set (CFLAGS)
 #
+#------------------------------------------------------------------------------
+
+#Target name
+BASENAME = c1m2
+TARGET = $(BASENAME).out
+
+#General Flags
+COMMONCFLAGS = -Wall -Werror -g -std=c99
+COMMONLDFLAGS = -Wl,-O0,-Map=$(BASENAME).map
+#No spaces after commas after -Wl option.
+
+CPPFLAGS = -E
+# -E flag makes the compiler stop in the preprocessed output
 
 #Compile time switches
 ifeq ($(PLATFORM), MSP432)
-	INCLUDES =  -I../includes/common	\
-                -I../includes/msp432	\
-		        -I../includes/CMSIS
-	SOURCES =   main.c						\
-		        memory.c						\
-		        interrupts_msp432p401r_gcc.c	\
-		        startup_msp432p401r_gcc.c     \
-                system_msp432p401r.c
+	INCLUDES =	-I../includes/common	\
+							-I../includes/msp432	\
+							-I../includes/CMSIS
+	SOURCES =   main.c												\
+							memory.c											\
+							interrupts_msp432p401r_gcc.c	\
+							startup_msp432p401r_gcc.c			\
+							system_msp432p401r.c
 
 	LINKER_FILE = msp432p401r.lds
 	CPU = cortex-m4
@@ -77,80 +90,131 @@ ifeq ($(PLATFORM), MSP432)
 	CC = arm-none-eabi-gcc
 	LD = arm-none-eabi-ld
 
-	LDFLAGS = -Wl, -O0, -T=$(LINKER_FILE),-Map=$(BASENAME).map
-	#Fixing the map file generation (not working)
-	#Try: -Xlinker -Map=output.map 
-	CFLAGS = -Wall -Werror -g -std=c99 -D$(PLATFORM) -mcpu=$(CPU) -march=$(ARCH) --specs=$(SPECS)
+	LDFLAGS = $(COMMONLDFLAGS), -T=$(LINKER_FILE)
+	#Problem: Map file generation is not working.
+	#Solution: between the comma "," and -Map=<map_name>.map flag, must be
+	#no spaces. ---> Now does work.
+
+	CFLAGS =	$(COMMONCFLAGS) -D$(PLATFORM) -mcpu=$(CPU)	\
+						-march=$(ARCH) --specs=$(SPECS)
 	OBJDUMP = arm-none-eabi-objdump
 endif
 ifeq ($(PLATFORM), HOST)
 	INCLUDES = -I../includes/common
 
-	SOURCES =   main.c	\
-	            memory.c
-#./main.c ./memory.c
+	SOURCES =		main.c	\
+							memory.c
+
 	CC = gcc
 	LD = ld
-	LDFLAGS = -Wl,-O0,-Map=$(BASENAME).map
-	#No spaces after commas after -Wl option produces less errors
-	#---> Still fix gcc: error: c1m2.out: No such file or directory
-
-	CFLAGS = -Wall -Werror -g -std=c99 -D$(PLATFORM)
+	LDFLAGS = $(COMMONLDFLAGS)
+	CFLAGS = $(COMMONCFLAGS) -D$(PLATFORM)
 	OBJDUMP = objdump
 endif
 
+#Listing files:
+OBJECTS = $(SOURCES:.c=.o)
 
-CPPFLAGS = -E
-BASENAME = c1m2
-TARGET = $(BASENAME).out
-OBJS = $(SOURCES:.c/.o)
+# 1. --------------------------------------------------------------------------
+# Complete build:					c1m2.map - Map file for the full build
+#													*.d      - Dependency Files for each source file
+#													*.o      - Individual object files
+#													c1m2.out - Output Executable file
 
-#SOURCES = source_file_outside_if.c          #We write a variable content for testing it
-#Rule for testing if SOURCES variable is actually working
-.PHONY: test1
-test1:
-	@echo "Variable INCLUDES:"
-	@echo "$(INCLUDES)"
-	@echo "Variable SOURCES:"
-	@echo "$(SOURCES)"
-	@echo "PLATFORM:"
-	@echo "$(PLATFORM)"
+# LDFLAGS contains the flags for creating the *.map file
 
-$(TARGET): $(SOURCES)
-	$(CC) $(CFLAGS) $(INCLUDES) $(SOURCES) $(LDFLAGS) -o $@
-
-#5. Compile all object files and link into a final executable.
 .PHONY: build
-build: $(TARGET)
+build: $(TARGET) $(OBJECTS)
+$(TARGET):
+	$(CC) $(CFLAGS) $(LDFLAGS) $(SOURCES) $(INCLUDES) -o $@
+# 2. --------------------------------------------------------------------------
+# //// Generates the object files of all c-program implementation files and its
+#      dependecies. ///////////////////////////////////////////////////////////
 
+#This implementation places dependency files into a subdirectory named .deps.
+DEPDIR := .deps
 
-#4. Compile all objects but do NOT link them
+# DEPFLAGS:
+# -MT $@
+# Set the name of the target in the generated dependency file.
+
+# -MMD
+# Generate dependency information as a side-effect of compilation, not instead
+# of compilation. This version omits system headers from the #generated
+# dependencies: if you prefer to preserve system headers as prerequisites,
+# use -MD.
+
+# -MP
+# Adds a target for each prerequisite in the list, to avoid errors when deleting
+# files.
+
+# -MF $(DEPDIR)/$*.d
+# Write the generated dependency file $(DEPDIR)/$*.d.
+
+DEPFLAGS = -MT $@ -MD -MP -MF $(DEPDIR)/$*.d
+
+# Delete the built-in rules for building object files from .c files, so that
+# our rule is used instead.
+# Doesn't work, it is NOT disabling the built in rule!!!
+%.o: %.c
+# Our rule for building object files with its dependency
+%.o: %.c $(DEPDIR)/%.d | $(DEPDIR)
+	$(CC) $(DEPFLAGS) -c $(CFLAGS) $(INCLUDES) -o $@ $<
+
+# Declare a rule for creating the dependency directory if it doesn’t exist.
+$(DEPDIR): ; @mkdir -p $@
+
+# Generate a list of all the dependency files that could exist.
+DEPFILES := $(SRCS:%.c=$(DEPDIR)/%.d)
+
+# Mention each dependency file as a target, so that make won’t fail if the file
+# doesn’t exist.
+$(DEPFILES):
+
+# 3. --------------------------------------------------------------------------
+# /// Compile all objects but do NOT link them. ///////////////////////////////
 .PHONY: compile-all
 compile-all: $(SOURCES)
-	$(CC) -c $(CFLAGS) $(INCLUDES) $(SOURCES)
+	$(CC) -c $(CFLAGS) $(INCLUDES) $^
 
-
-#1. Generates the preprocessed output of all c-program implementation files
+# 4. --------------------------------------------------------------------------
+# /// Generates the preprocessed output of all c-program implementation files. 
 %.i: %.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(INCLUDES) -o $@ $^	
+
+# 5. --------------------------------------------------------------------------
+# /// Generate assembly output of c-program implementation files and the final
+#     output executable. //////////////////////////////////////////////////////
+#%.asm: %.s $(TARGET)
+#	$(CC) -S $(CFLAGS) $< -O $@
+#	$(OBJDUMP) -S --disassemble $(TARGET) > $(BASENAME).asm
+#Problem: The previous rule does not work.
+#Solution: Next rule for creating the asm files does work.
+
+# 6. --------------------------------------------------------------------------
+# /// Create assembler file of a C source. ////////////////////////////////////
+%.asm: %.c
+	$(CC) -S $(CFLAGS) $(INCLUDES) $< -o $@
+# -S flag tells the compiler just generate the assembly file
 
 
-#2. Generate assembly output of c-program implementation files and the final
-#   output executable
-%.asm: %.s $(TARGET)
-	$(CC) -S $(CFLAGS) $< -O $@
-	$(OBJDUMP) -S --disassemble $(TARGET) > $(BASENAME).asm
+# 7. --------------------------------------------------------------------------
+# /// Generates the object file of all c-program implementation files. ////////
+#%.o: %.c
+#	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ $^
 
 
-#3. Generates the object file of all c-program implementation files
-%.O: %.c
-	$(CC) -c $(CFLAGS) $@ $< 
 
 
-#6. Removes all compiled objects, preprocessed outputs, assembly outputs,
-#   executable files and build output files
-OBJS = bject1.o
+# 9. --------------------------------------------------------------------------
+# /// Removes all compiled objects, preprocessed outputs, assembly outputs,
+#     executable files and build output files. ////////////////////////////////
 .PHONY: clean
 clean:
-	-sudo rm -f $(OBJS) $(TARGET) $(BASENAME).map *.asm *.i
-	echo "$(OBJS)"
+	rm -f $(OBJECTS) $(TARGET) $(BASENAME).map *.asm *.i
+	rm -r .dep
+
+
+include $(wildcard $(DEPFILES))
+
+#End of file

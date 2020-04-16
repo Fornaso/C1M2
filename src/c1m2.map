@@ -6,7 +6,7 @@ Archive member included to satisfy reference by file (symbol)
 Allocating common symbols
 Common symbol       size              file
 
-buffer              0xa               /tmp/ccz7flPQ.o
+buffer              0xa               /tmp/ccfGBPEN.o
 
 Discarded input sections
 
@@ -17,9 +17,9 @@ Discarded input sections
  .note.GNU-stack
                 0x0000000000000000        0x0 /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/ccz7flPQ.o
+                0x0000000000000000        0x0 /tmp/ccfGBPEN.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/ccNkMnno.o
+                0x0000000000000000        0x0 /tmp/ccTtUtjy.o
  .note.GNU-stack
                 0x0000000000000000        0x0 /usr/lib/x86_64-linux-gnu/libc_nonshared.a(elf-init.oS)
  .note.GNU-stack
@@ -37,8 +37,8 @@ Linker script and memory map
 LOAD /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o
 LOAD /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o
 LOAD /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o
-LOAD /tmp/ccz7flPQ.o
-LOAD /tmp/ccNkMnno.o
+LOAD /tmp/ccfGBPEN.o
+LOAD /tmp/ccTtUtjy.o
 LOAD /usr/lib/gcc/x86_64-linux-gnu/5/libgcc.a
 LOAD /usr/lib/gcc/x86_64-linux-gnu/5/libgcc_s.so
 LOAD /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/libc.so
@@ -160,9 +160,9 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
  .text          0x000000000040045a        0x0 /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o
  *fill*         0x000000000040045a        0x6 
  .text          0x0000000000400460       0xc6 /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o
- .text          0x0000000000400526      0x138 /tmp/ccz7flPQ.o
+ .text          0x0000000000400526      0x138 /tmp/ccfGBPEN.o
                 0x0000000000400526                main
- .text          0x000000000040065e       0xcc /tmp/ccNkMnno.o
+ .text          0x000000000040065e       0xcc /tmp/ccTtUtjy.o
                 0x000000000040065e                set_value
                 0x0000000000400681                clear_value
                 0x00000000004006a9                get_value
@@ -203,9 +203,9 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
  *(.eh_frame)
  .eh_frame      0x0000000000400810       0x30 /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o
  .eh_frame      0x0000000000400840       0x40 /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o
- .eh_frame      0x0000000000400880       0x20 /tmp/ccz7flPQ.o
+ .eh_frame      0x0000000000400880       0x20 /tmp/ccfGBPEN.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000004008a0       0xa0 /tmp/ccNkMnno.o
+ .eh_frame      0x00000000004008a0       0xa0 /tmp/ccTtUtjy.o
                                          0xb8 (size before relaxing)
  .eh_frame      0x0000000000400940       0x60 /usr/lib/x86_64-linux-gnu/libc_nonshared.a(elf-init.oS)
                                          0x78 (size before relaxing)
@@ -311,8 +311,8 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
  *fill*         0x000000000060102c        0x4 
  .data          0x0000000000601030        0x8 /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o
                 0x0000000000601030                __dso_handle
- .data          0x0000000000601038        0x0 /tmp/ccz7flPQ.o
- .data          0x0000000000601038        0x0 /tmp/ccNkMnno.o
+ .data          0x0000000000601038        0x0 /tmp/ccfGBPEN.o
+ .data          0x0000000000601038        0x0 /tmp/ccTtUtjy.o
  .data          0x0000000000601038        0x0 /usr/lib/x86_64-linux-gnu/libc_nonshared.a(elf-init.oS)
  .data          0x0000000000601038        0x0 /usr/lib/gcc/x86_64-linux-gnu/5/crtend.o
  .data          0x0000000000601038        0x0 /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
@@ -338,14 +338,14 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
  .bss           0x0000000000601038        0x0 /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o
  .bss           0x0000000000601038        0x0 /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o
  .bss           0x0000000000601038        0x1 /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o
- .bss           0x0000000000601039        0x0 /tmp/ccz7flPQ.o
- .bss           0x0000000000601039        0x0 /tmp/ccNkMnno.o
+ .bss           0x0000000000601039        0x0 /tmp/ccfGBPEN.o
+ .bss           0x0000000000601039        0x0 /tmp/ccTtUtjy.o
  .bss           0x0000000000601039        0x0 /usr/lib/x86_64-linux-gnu/libc_nonshared.a(elf-init.oS)
  .bss           0x0000000000601039        0x0 /usr/lib/gcc/x86_64-linux-gnu/5/crtend.o
  .bss           0x0000000000601039        0x0 /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
  *(COMMON)
  *fill*         0x0000000000601039        0x7 
- COMMON         0x0000000000601040        0xa /tmp/ccz7flPQ.o
+ COMMON         0x0000000000601040        0xa /tmp/ccfGBPEN.o
                 0x0000000000601040                buffer
                 0x0000000000601050                . = ALIGN ((. != 0x0)?0x8:0x1)
  *fill*         0x000000000060104a        0x6 
@@ -390,8 +390,8 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
  *(.comment)
  .comment       0x0000000000000000       0x35 /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o
                                          0x36 (size before relaxing)
- .comment       0x0000000000000035       0x36 /tmp/ccz7flPQ.o
- .comment       0x0000000000000035       0x36 /tmp/ccNkMnno.o
+ .comment       0x0000000000000035       0x36 /tmp/ccfGBPEN.o
+ .comment       0x0000000000000035       0x36 /tmp/ccTtUtjy.o
  .comment       0x0000000000000035       0x36 /usr/lib/gcc/x86_64-linux-gnu/5/crtend.o
 
 .debug
@@ -409,36 +409,36 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
 .debug_aranges  0x0000000000000000       0x60
  *(.debug_aranges)
  .debug_aranges
-                0x0000000000000000       0x30 /tmp/ccz7flPQ.o
+                0x0000000000000000       0x30 /tmp/ccfGBPEN.o
  .debug_aranges
-                0x0000000000000030       0x30 /tmp/ccNkMnno.o
+                0x0000000000000030       0x30 /tmp/ccTtUtjy.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
 .debug_info     0x0000000000000000      0x261
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x0000000000000000       0xd5 /tmp/ccz7flPQ.o
- .debug_info    0x00000000000000d5      0x18c /tmp/ccNkMnno.o
+ .debug_info    0x0000000000000000       0xd5 /tmp/ccfGBPEN.o
+ .debug_info    0x00000000000000d5      0x18c /tmp/ccTtUtjy.o
 
 .debug_abbrev   0x0000000000000000      0x144
  *(.debug_abbrev)
- .debug_abbrev  0x0000000000000000       0x87 /tmp/ccz7flPQ.o
- .debug_abbrev  0x0000000000000087       0xbd /tmp/ccNkMnno.o
+ .debug_abbrev  0x0000000000000000       0x87 /tmp/ccfGBPEN.o
+ .debug_abbrev  0x0000000000000087       0xbd /tmp/ccTtUtjy.o
 
 .debug_line     0x0000000000000000       0xc6
  *(.debug_line .debug_line.* .debug_line_end)
- .debug_line    0x0000000000000000       0x67 /tmp/ccz7flPQ.o
- .debug_line    0x0000000000000067       0x5f /tmp/ccNkMnno.o
+ .debug_line    0x0000000000000000       0x67 /tmp/ccfGBPEN.o
+ .debug_line    0x0000000000000067       0x5f /tmp/ccTtUtjy.o
 
 .debug_frame
  *(.debug_frame)
 
 .debug_str      0x0000000000000000      0x152
  *(.debug_str)
- .debug_str     0x0000000000000000      0x10c /tmp/ccz7flPQ.o
+ .debug_str     0x0000000000000000      0x10c /tmp/ccfGBPEN.o
                                         0x130 (size before relaxing)
- .debug_str     0x000000000000010c       0x46 /tmp/ccNkMnno.o
+ .debug_str     0x000000000000010c       0x46 /tmp/ccTtUtjy.o
                                         0x108 (size before relaxing)
 
 .debug_loc
